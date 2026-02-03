@@ -1,0 +1,30 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron-generate",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron-send",
+      "schedule": "30 14 * * *"
+    }
+  ],
+  "functions": {
+    "api/cron-generate.js": {
+      "maxDuration": 800
+    },
+    "api/cron-send.js": {
+      "maxDuration": 300
+    },
+    "api/download-pdf.js": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/api/index" },
+    { "source": "/subscribe", "destination": "/api/subscribe" },
+    { "source": "/unsubscribe", "destination": "/api/unsubscribe" },
+    { "source": "/download", "destination": "/api/download-pdf" },
+    { "source": "/under-the-hood", "destination": "/api/under-the-hood" }
+  ]
+}
