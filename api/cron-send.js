@@ -66,6 +66,8 @@ export default async function handler(req, res) {
         console.error(`Failed to send to ${email}:`, error.message);
         failed++;
       }
+      // Delay between sends to avoid Resend rate limits
+      await new Promise(resolve => setTimeout(resolve, 600));
     }
     
     console.log(`Email send complete: ${sent} sent, ${failed} failed`);
