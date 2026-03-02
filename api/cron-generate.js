@@ -98,6 +98,13 @@ ${briefingContext || 'No previous briefings available.'}
       // Skip 'thinking' blocks - they're internal reasoning
     }
 
+    // Extract email subject line before stripping preamble
+    const subjectMatch = briefingContent.match(/^SUBJECT:\s*(.+)$/m);
+    let subjectLine = subjectMatch ? subjectMatch[1].trim() : null;
+    if (subjectMatch) {
+      briefingContent = briefingContent.replace(/^SUBJECT:\s*.+\n?\n?/m, '');
+    }
+
     // Strip any preamble before the actual briefing
     // Look for common briefing start patterns and remove everything before
     const briefingStartPatterns = [
@@ -121,11 +128,32 @@ ${briefingContext || 'No previous briefings available.'}
 
     console.log(`Briefing generated: ${briefingContent.length} characters`);
 
+    // Build subject line: use extracted SUBJECT line, fall back to Lead headline
+    if (!subjectLine) {
+      const leadMatch = briefingContent.match(/^#{1,3}\s+(?:I\.\s*)?(.+?)$/m);
+      if (leadMatch) {
+        subjectLine = leadMatch[1].trim().substring(0, 80);
+      }
+    }
+
+    // Format the short date for the subject line (e.g., "Mar 2")
+    const shortDate = new Date().toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'America/Los_Angeles'
+    });
+    const emailSubject = subjectLine
+      ? `${subjectLine} — ${shortDate}`
+      : `Strategos: ${today}`;
+
+    console.log(`Subject line: ${emailSubject}`);
+
     // Save to Vercel Blob
     const briefingData = {
       date: today,
       dateKey: dateKey,
       content: briefingContent,
+      subjectLine: emailSubject,
       generatedAt: new Date().toISOString(),
       wordCount: briefingContent.split(/\s+/).length
     };

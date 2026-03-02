@@ -57,7 +57,7 @@ export default async function handler(req, res) {
         await resend.emails.send({
           from: fromEmail,
           to: [email],
-          subject: `Strategos: ${briefing.date}`,
+          subject: briefing.subjectLine || `Strategos: ${briefing.date}`,
           html: htmlContent,
           text: plainTextContent,
         });
