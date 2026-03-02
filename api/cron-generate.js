@@ -98,11 +98,16 @@ ${briefingContext || 'No previous briefings available.'}
       // Skip 'thinking' blocks - they're internal reasoning
     }
 
-    // Extract email subject line before stripping preamble
+    // Extract email subject line and preheader before stripping preamble
     const subjectMatch = briefingContent.match(/^SUBJECT:\s*(.+)$/m);
     let subjectLine = subjectMatch ? subjectMatch[1].trim() : null;
+    const preheaderMatch = briefingContent.match(/^PREHEADER:\s*(.+)$/m);
+    let preheader = preheaderMatch ? preheaderMatch[1].trim() : null;
     if (subjectMatch) {
-      briefingContent = briefingContent.replace(/^SUBJECT:\s*.+\n?\n?/m, '');
+      briefingContent = briefingContent.replace(/^SUBJECT:\s*.+\n?/m, '');
+    }
+    if (preheaderMatch) {
+      briefingContent = briefingContent.replace(/^PREHEADER:\s*.+\n?\n?/m, '');
     }
 
     // Strip any preamble before the actual briefing
@@ -132,7 +137,7 @@ ${briefingContext || 'No previous briefings available.'}
     if (!subjectLine) {
       const leadMatch = briefingContent.match(/^#{1,3}\s+(?:I\.\s*)?(.+?)$/m);
       if (leadMatch) {
-        subjectLine = leadMatch[1].trim().substring(0, 80);
+        subjectLine = leadMatch[1].trim().substring(0, 50);
       }
     }
 
@@ -147,6 +152,7 @@ ${briefingContext || 'No previous briefings available.'}
       : `Strategos: ${today}`;
 
     console.log(`Subject line: ${emailSubject}`);
+    if (preheader) console.log(`Preheader: ${preheader}`);
 
     // Save to Vercel Blob
     const briefingData = {
@@ -154,6 +160,7 @@ ${briefingContext || 'No previous briefings available.'}
       dateKey: dateKey,
       content: briefingContent,
       subjectLine: emailSubject,
+      preheader: preheader,
       generatedAt: new Date().toISOString(),
       wordCount: briefingContent.split(/\s+/).length
     };

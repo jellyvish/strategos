@@ -51,7 +51,7 @@ export default async function handler(req, res) {
     for (const email of subscribers) {
       try {
         // Generate personalized email content with unsubscribe link
-        const htmlContent = markdownToEmailHtml(briefing.content, briefing.date, email);
+        const htmlContent = markdownToEmailHtml(briefing.content, briefing.date, email, briefing.preheader || '');
         const plainTextContent = getPlainTextVersion(briefing.content, email);
         
         await resend.emails.send({
