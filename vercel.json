@@ -1,14 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron-generate",
-      "schedule": "0 14 * * *"
-    },
-    {
-      "path": "/api/cron-send",
-      "schedule": "30 14 * * *"
-    }
-  ],
   "functions": {
     "api/cron-generate.js": {
       "maxDuration": 800
