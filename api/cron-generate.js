@@ -133,17 +133,23 @@ ${briefingContext || 'No previous briefings available.'}
     const blobUrl = await saveBriefing(dateKey, briefingData);
     console.log(`Briefing saved to: ${blobUrl}`);
 
-    // Extract Lead topic from the briefing (first ## header after title)
-    const leadMatch = briefingContent.match(/^## (.+?)$/m);
+    // Extract Lead topic from the briefing (first section header after the title).
+    // Section headers are emitted at ##/### level with an optional roman-numeral
+    // prefix, e.g. "### I. China's chip breakthrough...". The one-hash title is
+    // skipped, and the "I." numeral is stripped so only the headline is stored.
+    const leadMatch = briefingContent.match(/^#{2,3}\s+(?:[IVXLC]+\.\s*)?(.+?)\s*$/m);
     const newLeadTopic = leadMatch ? leadMatch[1].substring(0, 100) : 'Unknown';
 
     // Extract trade ticker (look for ticker symbols in Trade section)
-    const tradeMatch = briefingContent.match(/### (?:VII\.|The Actionable Trade)[\s\S]*?\b([A-Z]{1,5})\b/);
+    const tradeMatch = briefingContent.match(/#{2,3}\s+(?:VII\.|The Actionable Trade)[\s\S]*?\b([A-Z]{2,5})\b/);
     const newTrade = tradeMatch ? { ticker: tradeMatch[1], date: dateKey } : null;
 
-    // Extract book recommendation
-    const bookMatch = briefingContent.match(/### (?:XII\.|Deep Read)[\s\S]*?\*\*(.+?)\*\* by/);
-    const newBook = bookMatch ? bookMatch[1] : null;
+    // Extract book recommendation and strip any markdown link syntax from the
+    // title (e.g. "[Title](url)" -> "Title") so dedup compares on the title text.
+    const bookMatch = briefingContent.match(/#{2,3}\s+(?:XII\.|Deep Read)[\s\S]*?\*\*(.+?)\*\* by/);
+    const newBook = bookMatch
+      ? bookMatch[1].replace(/\[([^\]]+)\]\([^)]*\)/, '$1').trim()
+      : null;
 
     // Update memory state
     memory.leadTopics = [newLeadTopic, ...memory.leadTopics].slice(0, 30);
